@@ -1,0 +1,174 @@
+/* 🌿 Overall Page Styling */
+.consultants-container {
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(34, 139, 34, 0.2);
+}
+
+/* 🌟 Title */
+.consultants-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1b5e20;
+  margin-bottom: 40px;
+}
+
+/* 🧑‍🌾 Grid layout */
+.consultants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 30px;
+}
+
+/* 💼 Consultant Card */
+.consultant-card {
+  background: linear-gradient(145deg, #ffffff, #e8f5e9);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0, 100, 0, 0.2);
+  transition: all 0.3s ease;
+  border: 2px solid #a5d6a7;
+}
+
+.consultant-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0, 100, 0, 0.3);
+  background: linear-gradient(145deg, #f0fff0, #ffffff);
+}
+
+/* 🖼️ Image Section */
+.consultant-image-container {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-bottom: 3px solid #66bb6a;
+}
+
+.consultant-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.consultant-card:hover img {
+  transform: scale(1.05);
+}
+
+/* 📋 Info Section */
+.consultant-info {
+  padding: 20px;
+  text-align: center;
+}
+
+.consultant-info h3 {
+  font-size: 1.4rem;
+  color: #1b5e20;
+  margin-bottom: 8px;
+}
+
+.bio {
+  color: #4e4e4e;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
+.specialties {
+  color: #2e7d32;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.fee {
+  font-weight: 600;
+  color: #1b5e20;
+  background: #c8e6c9;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+/* 📞 Contact Info */
+.contact {
+  border-top: 1px solid #a5d6a7;
+  padding-top: 10px;
+  color: #2e7d32;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.contact p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 5px 0;
+}
+
+/* ✅ Call Button */
+.call-btn {
+  background: linear-gradient(90deg, #43a047, #2e7d32);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.call-btn:hover {
+  background: linear-gradient(90deg, #66bb6a, #388e3c);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(56, 142, 60, 0.3);
+}
+
+.call-icon {
+  font-size: 1.1rem;
+}
+
+/* ⏳ Loading Text */
+.loading-screen {
+  text-align: center;
+  font-size: 18px;
+  color: #1b5e20;
+  margin-top: 60px;
+  font-weight: 500;
+}
+
+/* ❌ No Consultants */
+.no-consultants {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #757575;
+  background: #f9fbe7;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #c5e1a5;
+}
+
+/* 📱 Responsive */
+@media (max-width: 600px) {
+  .consultants-title {
+    font-size: 2rem;
+  }
+
+  .consultant-image-container {
+    height: 180px;
+  }
+
+  .call-btn {
+    width: 80%;
+    margin: 0 auto;
+  }
+}

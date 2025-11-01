@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { handleError } from '../utils';
 import { FaTools, FaRupeeSign, FaUser, FaPhone } from 'react-icons/fa';
-import '../styles/DashComp.css'
-
+import '../styles/DashComp.css';
 
 function MyLending({ darkMode }) {
   const [userId, setUserId] = useState('');
@@ -24,15 +23,31 @@ function MyLending({ darkMode }) {
   const fetchMyLending = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        handleError('No token found, please login again');
+        navigate('/login');
+        return;
+      }
+
       const response = await fetch(`http://localhost:5000/protected/myLending`, {
         headers: {
-          'Authorization': localStorage.getItem('token'),
+          'Authorization': `Bearer ${token}`, // ✅ Corrected
+          'Content-Type': 'application/json',
         },
       });
+
       const result = await response.json();
-      setMyLending(result.data || []);
+
+      if (!response.ok) {
+        handleError(result.message || 'Failed to fetch lendings');
+        return;
+      }
+
+      setMyLending(Array.isArray(result.data) ? result.data : []);
     } catch (err) {
-      handleError(err.message);
+      handleError(err.message || 'Something went wrong while fetching data');
     } finally {
       setLoading(false);
     }
@@ -44,15 +59,12 @@ function MyLending({ darkMode }) {
     }
   }, [userId]);
 
-  
-
   return (
     <div className={`card ${darkMode ? 'dark' : ''}`}>
       <div className="section-header">
         <h2 className="section-title">
           <FaTools className="icon" /> My Lendings
         </h2>
-        
       </div>
 
       {loading ? (
@@ -69,7 +81,6 @@ function MyLending({ darkMode }) {
                 <th>Price/Day</th>
                 <th>Borrower</th>
                 <th>Contact</th>
-                
               </tr>
             </thead>
             <tbody>
@@ -77,16 +88,18 @@ function MyLending({ darkMode }) {
                 <tr key={idx}>
                   <td>
                     <div className="equipment-info">
-                      {equipment?.image && (
-                        <img 
-                          src={`http://localhost:5000/uploads/${equipment.image}`} 
-                          alt={equipment.name}
-                          className="equipment-thumbnail"
-                          onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/50x50?text=Equipment';
-                          }}
-                        />
-                      )}
+                      <img
+                        src={
+                          equipment?.image
+                            ? `http://localhost:5000/uploads/${equipment.image}`
+                            : 'https://via.placeholder.com/50x50?text=No+Image'
+                        }
+                        alt={equipment?.name || 'Equipment'}
+                        className="equipment-thumbnail"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/50x50?text=Error';
+                        }}
+                      />
                       <span>{equipment?.name || 'N/A'}</span>
                     </div>
                   </td>
@@ -100,7 +113,6 @@ function MyLending({ darkMode }) {
                   <td>
                     <FaPhone /> {borrower?.contact || 'N/A'}
                   </td>
-                  
                 </tr>
               ))}
             </tbody>
@@ -109,10 +121,7 @@ function MyLending({ darkMode }) {
       ) : (
         <div className="empty-state">
           <p>No lending history yet.</p>
-          <button 
-            className="btn btn-primary" 
-            onClick={() => navigate('/addEquip')}
-          >
+          <button className="btn btn-primary" onClick={() => navigate('/addEquip')}>
             Add Equipment to Lend
           </button>
         </div>

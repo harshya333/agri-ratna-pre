@@ -4,12 +4,13 @@ const BookModel = require("../Models/Booking");
 const Consultant = require("../Models/Consultant");
 
 // ✅ Add new consultant profile
+
 const addConsultant = async (req, res) => {
   try {
-    const { bio, specialties, fee, location, imageUrl } = req.body;
+    const { bio, specialties, fee, location } = req.body;
     const userId = req.user._id;
 
-    // Check if already registered as consultant
+    // Check if consultant already exists
     const existing = await Consultant.findOne({ userId });
     if (existing) {
       return res.status(400).json({
@@ -18,10 +19,20 @@ const addConsultant = async (req, res) => {
       });
     }
 
+    // ✅ Handle uploaded image
+    let imageUrl = "";
+    if (req.file) {
+      imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    }
+
     const newConsultant = new Consultant({
       userId,
       bio,
-      specialties,
+      specialties: Array.isArray(specialties)
+        ? specialties
+        : specialties
+        ? specialties.split(",").map((s) => s.trim())
+        : [],
       fee,
       imageUrl,
       location,
@@ -32,6 +43,7 @@ const addConsultant = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Consultant profile added successfully",
+      data: newConsultant,
     });
   } catch (err) {
     console.error("Error adding consultant:", err);
@@ -45,22 +57,14 @@ const addConsultant = async (req, res) => {
 // ✅ Get all consultants (for farmer view)
 const getAllConsultants = async (req, res) => {
   try {
-    // Populate user info for each consultant
     const consultants = await Consultant.find()
       .populate("userId", "name email contact location")
       .lean();
 
-    if (!consultants || consultants.length === 0) {
-      return res.status(200).json({
-        success: true,
-        data: [],
-        message: "No consultants found",
-      });
-    }
-
     res.status(200).json({
       success: true,
-      data: consultants,
+      data: consultants || [],
+      message: consultants.length === 0 ? "No consultants found" : undefined,
     });
   } catch (err) {
     console.error("Error fetching consultants:", err);
@@ -103,8 +107,9 @@ const getConsultantById = async (req, res) => {
 // ✅ Add new equipment
 const addEqipment = async (req, res) => {
   try {
-    const { type, name, pricePerDay, location, Lender } = req.body;
+    const { type, name, pricePerDay, location } = req.body;
     const image = req.file?.filename;
+    const Lender = req.user._id; // ✅ Automatically assign logged-in user as Lender
 
     const newEquip = new EquipModel({
       type,
@@ -134,7 +139,6 @@ const addEqipment = async (req, res) => {
 const getAllEquipments = async (req, res) => {
   try {
     const equipments = await EquipModel.find().sort({ createdAt: -1 });
-
     res.status(200).json({
       success: true,
       data: equipments,
@@ -151,7 +155,8 @@ const getAllEquipments = async (req, res) => {
 // ✅ Book equipment
 const BookEqipment = async (req, res) => {
   try {
-    const { equipId, userId, lenderId } = req.body;
+    const { equipId, lenderId } = req.body;
+    const userId = req.user._id; // ✅ safer: take from token, not frontend
 
     const newBooking = new BookModel({
       BID: userId,

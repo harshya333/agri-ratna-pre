@@ -12,12 +12,16 @@ function EditProfile({ darkMode }) {
     location: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchProfile = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return handleError('Please log in first.');
+
     try {
-      const response = await fetch('http://localhost:5000/protected/profile', {
+      const response = await fetch('http://localhost:5000/pro/profile', {
         headers: {
-          'Authorization': localStorage.getItem('token')
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -30,6 +34,8 @@ function EditProfile({ darkMode }) {
       }
     } catch (err) {
       handleError(err.message || 'Failed to load profile');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,13 +49,14 @@ function EditProfile({ darkMode }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch('http://localhost:5000/protected/editProfile', {
+      const response = await fetch('http://localhost:5000/pro/editProfile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('token')
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(profile)
       });
@@ -74,6 +81,14 @@ function EditProfile({ darkMode }) {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`edit-profile-page ${darkMode ? 'dark' : ''}`}>

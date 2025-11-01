@@ -13,33 +13,36 @@ function AddEquip({ darkMode }) {
     pricePerDay: '',
     location: '',
     image: null,
-    imagePreview: null
+    imagePreview: null,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ Handle form input and image upload
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (name === 'image') {
       const file = files[0];
-      setEquipInfo(prev => ({ 
-        ...prev, 
+      setEquipInfo((prev) => ({
+        ...prev,
         image: file,
-        imagePreview: file ? URL.createObjectURL(file) : null
+        imagePreview: file ? URL.createObjectURL(file) : null,
       }));
     } else {
-      setEquipInfo(prev => ({ ...prev, [name]: value }));
+      setEquipInfo((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  // ✅ Submit Equipment Data
   const handleAddEquip = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const { type, name, pricePerDay, location, image } = equipInfo;
     const lenderId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
 
     if (!type || !name || !pricePerDay || !location || !image || !lenderId) {
       setIsSubmitting(false);
@@ -55,21 +58,22 @@ function AddEquip({ darkMode }) {
       formData.append('Lender', lenderId);
       formData.append('image', image);
 
+      // ✅ Fixed Authorization header format
       const response = await fetch('http://localhost:5000/protected/addEquipment', {
-        headers: {
-          'Authorization': localStorage.getItem('token')
-        },
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`, // must include Bearer
+        },
         body: formData,
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
-        handleSuccess(result.message);
+        handleSuccess(result.message || 'Equipment added successfully!');
         setTimeout(() => navigate('/home'), 1500);
       } else {
-        handleError(result.error || result.message);
+        handleError(result.error || result.message || 'Failed to add equipment');
       }
     } catch (err) {
       handleError(err.message || 'Something went wrong');
@@ -84,17 +88,19 @@ function AddEquip({ darkMode }) {
       <div className='add-equip-container'>
         <div className='add-equip-card'>
           <div className='form-header'>
-            <h1><FaTractor className="header-icon" /> Add Equipment</h1>
+            <h1>
+              <FaTractor className='header-icon' /> Add Equipment
+            </h1>
             <p>List your agricultural equipment for rent</p>
           </div>
 
           <form className='add-equip-form' onSubmit={handleAddEquip}>
             <div className='form-row'>
-              {/* Image Preview */}
+              {/* ✅ Image Upload */}
               <div className='image-upload-container'>
                 <div className='image-preview'>
                   {equipInfo.imagePreview ? (
-                    <img src={equipInfo.imagePreview} alt="Equipment preview" />
+                    <img src={equipInfo.imagePreview} alt='Equipment preview' />
                   ) : (
                     <div className='image-placeholder'>
                       <FaUpload className='upload-icon' />
@@ -114,7 +120,7 @@ function AddEquip({ darkMode }) {
                 </label>
               </div>
 
-              {/* Form Fields */}
+              {/* ✅ Form Fields */}
               <div className='form-fields'>
                 <div className='form-group'>
                   <label htmlFor='type'>Equipment Type</label>
@@ -157,7 +163,7 @@ function AddEquip({ darkMode }) {
                       name='pricePerDay'
                       placeholder='e.g., 1500'
                       value={equipInfo.pricePerDay}
-                      min="1"
+                      min='1'
                       required
                     />
                   </div>
@@ -180,16 +186,12 @@ function AddEquip({ darkMode }) {
               </div>
             </div>
 
-            <button 
-              type='submit' 
-              className='submit-btn'
-              disabled={isSubmitting}
-            >
+            <button type='submit' className='submit-btn' disabled={isSubmitting}>
               {isSubmitting ? 'Adding...' : 'List Equipment'}
             </button>
           </form>
         </div>
-        <ToastContainer position="bottom-right" theme={darkMode ? 'dark' : 'light'} />
+        <ToastContainer position='bottom-right' theme={darkMode ? 'dark' : 'light'} />
       </div>
     </div>
   );

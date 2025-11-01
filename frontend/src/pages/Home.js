@@ -8,7 +8,7 @@ import MyBooking from '../components/Booking';
 import MyLending from '../components/Lending';
 import Profile from '../components/profile';
 import 'react-toastify/dist/ReactToastify.css';
-import '../styles/Home.css'; // Create this CSS file
+import '../styles/Home.css';
 
 function Home() {
   const navigate = useNavigate();
@@ -19,27 +19,19 @@ function Home() {
     if (!storedUserId) {
       handleError('User not logged in');
       navigate('/login');
+      return;
     }
-    
-    // Check user's preferred color scheme
+
+    // Check user’s system dark mode preference
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setDarkMode(prefersDark);
-    
-    // Add class to body based on dark mode
-    if (prefersDark) {
-      document.body.classList.add('dark-theme');
-    } else {
-      document.body.classList.remove('dark-theme');
-    }
+    document.body.classList.toggle('dark-theme', prefersDark);
   }, [navigate]);
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    if (!darkMode) {
-      document.body.classList.add('dark-theme');
-    } else {
-      document.body.classList.remove('dark-theme');
-    }
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    document.body.classList.toggle('dark-theme', newMode);
   };
 
   return (
@@ -47,12 +39,22 @@ function Home() {
       <Sidebar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
       <main className="main-content">
         <div className="content-container">
+          {/* Sections */}
           <Profile darkMode={darkMode} />
           <MyEquipments darkMode={darkMode} />
           <MyBooking darkMode={darkMode} />
           <MyLending darkMode={darkMode} />
         </div>
-        <ToastContainer position="bottom-right" theme={darkMode ? 'dark' : 'light'} />
+
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnHover
+          theme={darkMode ? 'dark' : 'light'}
+        />
       </main>
     </div>
   );

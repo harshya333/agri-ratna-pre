@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { handleError } from '../utils';
 import { FaCalendarAlt, FaRupeeSign, FaUser, FaPhone } from 'react-icons/fa';
-import '../styles/DashComp.css'
+import '../styles/DashComp.css';
 
 function MyBooking({ darkMode }) {
   const [userId, setUserId] = useState('');
   const [myBookings, setMyBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,15 +22,34 @@ function MyBooking({ darkMode }) {
 
   const fetchMyBookings = async () => {
     try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        handleError('No token found, please login again');
+        navigate('/login');
+        return;
+      }
+
       const response = await fetch(`http://localhost:5000/protected/myBookings`, {
         headers: {
-          'Authorization': localStorage.getItem('token'),
+          'Authorization': `Bearer ${token}`, // ✅ Fixed Bearer token issue
+          'Content-Type': 'application/json',
         },
       });
+
       const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        handleError(result.message || 'Failed to fetch bookings');
+        return;
+      }
+
       setMyBookings(result.data || []);
     } catch (err) {
-      handleError(err.message);
+      handleError(err.message || 'Error fetching bookings');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,7 +65,11 @@ function MyBooking({ darkMode }) {
         <FaCalendarAlt className="icon" /> My Bookings
       </h2>
 
-      {myBookings.length > 0 ? (
+      {loading ? (
+        <div className="loading-state">
+          <p>Loading your bookings...</p>
+        </div>
+      ) : myBookings.length > 0 ? (
         <div className="table-container">
           <table className="bookings-table">
             <thead>

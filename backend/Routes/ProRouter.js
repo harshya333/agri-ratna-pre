@@ -1,5 +1,8 @@
+const express = require("express");
+const router = express.Router();
 const upload = require("../Middlewares/Uploads");
-const router = require('express').Router();
+const ensureAuthenticated = require("../Middlewares/Auth");
+
 const {
   addEqipment,
   getAllEquipments,
@@ -9,31 +12,39 @@ const {
   myLending,
   profile,
   updateProfile,
-} = require('../Controllers/ProController');
-
-const {
   addConsultant,
   getAllConsultants,
-  getConsultantById
-} = require('../Controllers/ProController');
+  getConsultantById,
+} = require("../Controllers/ProController");
 
-const ensureAuthenticated = require('../Middlewares/Auth');
+// =============================
+// 🛠️ Equipment Routes
+// =============================
+router.post("/addEquipment", ensureAuthenticated, upload.single("image"), addEqipment);
+router.get("/allEquipments", ensureAuthenticated, getAllEquipments);
+router.post("/bookEquipment", ensureAuthenticated, BookEqipment);
+router.get("/myEquipments", ensureAuthenticated, myEquipments);
+router.get("/myBookings", ensureAuthenticated, myBookings);
+router.get("/myLending", ensureAuthenticated, myLending);
 
-// Equipment routes
-router.post('/addEquipment', ensureAuthenticated, upload.single("image"), addEqipment);
-router.get('/allEquipments', ensureAuthenticated, getAllEquipments);
-router.post('/bookEquipment', ensureAuthenticated, BookEqipment);
-router.get('/myEquipments', ensureAuthenticated, myEquipments);
-router.get('/myBookings', ensureAuthenticated, myBookings);
-router.get('/myLending', ensureAuthenticated, myLending);
+// =============================
+// 👤 User Profile Routes
+// =============================
+router.get("/profile", ensureAuthenticated, profile);
+router.put("/editProfile", ensureAuthenticated, updateProfile);
 
-// User routes
-router.get('/profile', ensureAuthenticated, profile);
-router.put('/editProfile', ensureAuthenticated, updateProfile);
+// =============================
+// 🧑‍🌾 Consultant Routes
+// =============================
+// (If consultants will upload images in future, we can add `upload.single("image")`)
+router.post(
+  "/addConsultant",
+  ensureAuthenticated,
+  upload.single("image"), // 👈 enables image upload
+  addConsultant
+);
 
-// ✅ Consultant routes
-router.post('/addConsultant', ensureAuthenticated, addConsultant);
-router.get('/consultants', ensureAuthenticated, getAllConsultants);
-router.get('/consultant/:id', ensureAuthenticated, getConsultantById);
+router.get("/consultants", ensureAuthenticated, getAllConsultants);
+router.get("/consultant/:id", ensureAuthenticated, getConsultantById);
 
 module.exports = router;

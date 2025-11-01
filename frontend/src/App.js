@@ -5,35 +5,36 @@ import Signup from './pages/Signup';
 import Home from './pages/Home';
 import AddEquip from './pages/AddEquip';
 import IndexPage from './pages/First';
-import EquipmentsList from './pages/BookEquip'
+import EquipmentsList from './pages/BookEquip';
 import { useState } from 'react';
-import RefrshHandler from './RefereshHandler';
+import RefreshHandler from './RefereshHandler'; // ✅ ensure filename matches
 import Profile from './pages/EditProfile';
 import Consultants from './pages/Consultants';
-
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const PrivateRoute = ({ element }) => {
-    return isAuthenticated ? element : <Navigate to="/login" />
-  }
+    return isAuthenticated ? element : <Navigate to="/login" />;
+  };
 
   return (
     <div className="App">
-      <RefrshHandler setIsAuthenticated={setIsAuthenticated} />
+      {/* ✅ RefreshHandler sets auth state on reload */}
+      <RefreshHandler setIsAuthenticated={setIsAuthenticated} />
+
       <Routes>
-        <Route path='/' element={<IndexPage />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/signup' element={<Signup />} />
-        <Route path='/home' element={<PrivateRoute element={<Home />} />} />
-        <Route path='/addEquip' element={<PrivateRoute element={<AddEquip />} />} />
-        <Route path='/disEquip' element={<PrivateRoute element={<EquipmentsList />} />} />
-        <Route path='/editProfile' element={<PrivateRoute element={<Profile />} />} />
+        {/* Public routes */}
+        <Route path="/" element={<IndexPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
-        <Route path="/consultants" element={<Consultants />} />
-
-
+        {/* Protected routes */}
+        <Route path="/home" element={<PrivateRoute element={<Home />} />} />
+        <Route path="/addEquip" element={<PrivateRoute element={<AddEquip />} />} />
+        <Route path="/disEquip" element={<PrivateRoute element={<EquipmentsList />} />} />
+        <Route path="/editProfile" element={<PrivateRoute element={<Profile />} />} />
+        <Route path="/consultants" element={<PrivateRoute element={<Consultants />} />} />
       </Routes>
     </div>
   );

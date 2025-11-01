@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { handleError } from '../utils';
-import { FaTractor, FaRupeeSign, FaPlusCircle } from 'react-icons/fa';
-import '../styles/DashComp.css'
+import { FaCalendarAlt, FaRupeeSign, FaUser, FaPhone } from 'react-icons/fa';
+import '../styles/DashComp.css';
 
-function MyEquipments({ darkMode }) {
+function MyBooking({ darkMode }) {
   const [userId, setUserId] = useState('');
-  const [myEquipments, setMyEquipments] = useState([]);
+  const [myBookings, setMyBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // ✅ Load logged-in user
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
     if (!storedUserId) {
@@ -19,59 +21,90 @@ function MyEquipments({ darkMode }) {
     }
   }, [navigate]);
 
-  const fetchMyEquipments = async () => {
+  // ✅ Fetch bookings
+  const fetchMyBookings = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/protected/myEquipments`, {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        handleError('No token found, please login again');
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/protected/myBookings`, {
         headers: {
-          'Authorization': localStorage.getItem('token'),
+          'Authorization': `Bearer ${token}`, // ✅ fixed format
+          'Content-Type': 'application/json',
         },
       });
+
       const result = await response.json();
-      setMyEquipments(result.data || []);
+
+      if (!response.ok || !result.success) {
+        handleError(result.message || 'Failed to fetch bookings');
+        return;
+      }
+
+      setMyBookings(result.data || []);
     } catch (err) {
-      handleError(err.message);
+      handleError(err.message || 'Something went wrong while fetching bookings');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // ✅ Load data once userId is available
   useEffect(() => {
     if (userId) {
-      fetchMyEquipments();
+      fetchMyBookings();
     }
   }, [userId]);
 
   return (
     <div className={`card ${darkMode ? 'dark' : ''}`}>
       <h2 className="section-title">
-        <FaTractor className="icon" /> My Equipment
+        <FaCalendarAlt className="icon" /> My Bookings
       </h2>
 
-      {myEquipments.length > 0 ? (
-        <div className="equipment-grid">
-          {myEquipments.map((equip) => (
-            <div className="equipment-card" key={equip._id}>
-              <div className="equipment-image">
-                <img
-                  src={`http://localhost:5000/uploads/${equip.image}`}
-                  alt={equip.name}
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/200x150?text=Equipment+Image';
-                  }}
-                />
-              </div>
-              <div className="equipment-details">
-                <h3>{equip.name}</h3>
-                <p><strong>Type:</strong> {equip.type}</p>
-                <p><strong>Price:</strong> <FaRupeeSign /> {equip.pricePerDay}/day</p>
-                <p><strong>Status:</strong> {equip.availability ? 'Available' : 'Rented'}</p>
-              </div>
-            </div>
-          ))}
+      {loading ? (
+        <div className="loading-state">
+          <p>Loading your bookings...</p>
+        </div>
+      ) : myBookings.length > 0 ? (
+        <div className="table-container">
+          <table className="bookings-table">
+            <thead>
+              <tr>
+                <th>Equipment</th>
+                <th>Type</th>
+                <th>Price/Day</th>
+                <th>Lender</th>
+                <th>Contact</th>
+              </tr>
+            </thead>
+            <tbody>
+              {myBookings.map(({ equipment, lender }, idx) => (
+                <tr key={idx}>
+                  <td>{equipment?.name || 'N/A'}</td>
+                  <td>{equipment?.type || 'N/A'}</td>
+                  <td><FaRupeeSign /> {equipment?.pricePerDay || 'N/A'}</td>
+                  <td><FaUser /> {lender?.name || 'N/A'}</td>
+                  <td><FaPhone /> {lender?.contact || 'N/A'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : (
         <div className="empty-state">
-          <p>No equipment added yet.</p>
-          <button className="btn btn-primary" onClick={() => navigate('/addEquip')}>
-            <FaPlusCircle /> Add Equipment
+          <p>No bookings yet.</p>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/disEquip')}
+          >
+            Browse Equipment
           </button>
         </div>
       )}
@@ -79,4 +112,4 @@ function MyEquipments({ darkMode }) {
   );
 }
 
-export default MyEquipments;
+export default MyBooking;
